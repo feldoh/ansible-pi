@@ -1,0 +1,10 @@
+---
+- name: Bootstrap - stage1
+  hosts: raspberries
+  remote_user: pi
+  sudo: True
+  gather_facts: yes
+
+  roles:
+    - role: bootstrap
+      tags: bootstrap,bootstrap_stage1

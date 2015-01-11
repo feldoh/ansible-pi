@@ -1,0 +1,9 @@
+---
+- name: NodeJS
+  hosts: nodejs
+  sudo: True
+  gather_facts: no
+
+  roles:
+    - role: nodejs
+      tags: nodejs

@@ -1,0 +1,10 @@
+---
+
+- name: Download nodejs deb
+  get_url: url={{ nodejs.arm_url }}/{{ nodejs.arm_deb }} dest=/tmp/{{ nodejs.arm_deb }}
+
+- name: Install deb
+  apt: deb=/tmp/{{ nodejs.arm_deb }}
+
+- name: Check Version
+  command: node -v
