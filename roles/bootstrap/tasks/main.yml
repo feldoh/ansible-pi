@@ -6,7 +6,7 @@
 # Key management
 - name: configure keys
   authorized_key: >
-    user={{ item }}
+    user=pi
     key="{{ lookup('file', 'keys/' + item) }}"
   with_items:
     - dlowe_air.pub
