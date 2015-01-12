@@ -1,0 +1,59 @@
+---
+
+# Configure apt
+- name: Disable recommends
+  copy: |
+    dest=/etc/apt/apt.conf.d/02recommended-suggested
+    content='APT::Install-Recommends "0";
+             APT::Install-Suggests "0";'
+
+- name: configure apt auto-upgrades
+  copy: |
+    dest=/etc/apt/apt.conf.d/20auto-upgrades
+    content='APT::Periodic::Update-Package-Lists "1";
+             APT::Periodic::Unattended-Upgrade "0";'
+
+# Automate some apt tasks
+- name: Cron for daily apt-get update
+  cron: name="apt-get autoupdate" weekday="*" minute={{ 59 | random }} hour={{ 4 | random }}
+        user="root" job="/usr/bin/apt-get update -qq"
+        cron_file=ansible_apt_autoupdate
+
+- name: Cron for daily apt-get clean
+  cron: name="apt-get autoclean" weekday="*" minute="0" hour=2
+        user="root" job="/usr/bin/apt-get clean"
+        cron_file=ansible_apt_autoclean
+
+# Package management
+- name: Update apt cache.
+  apt: update_cache=yes cache_valid_time=3600
+  tags: updates
+
+- name: Update the Raspbian distribution.
+  apt: upgrade=yes
+  tags: updates
+
+- name: Purge required packages
+  action: apt pkg={{ item }} state=absent
+  with_items:
+   - wolfram-engine
+
+- name: Make sure some basic tools are installed
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - unattended-upgrades
+    - avahi-daemon
+    - rpi-update
+    - ack-grep
+    - screen
+    - curl
+    - git
+    - vim
+
+- name: Autoremove any unused packages.
+  shell: "apt-get autoremove --assume-yes --purge"
+  tags: updates
+
+- name: Autoclean the system.
+  shell: "apt-get autoclean --assume-yes"
+  tags: updates

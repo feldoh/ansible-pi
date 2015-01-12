@@ -1,0 +1,21 @@
+---
+
+# Key management
+- name: generate ssh key
+  user: name=pi generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
+
+- name: configure keys
+  authorized_key: >
+    user=pi
+    key="{{ lookup('file', 'keys/' + item) }}"
+  with_items:
+    - dlowe_air.pub
+    - mchapman_air.pub
+
+- name: ensure github.com is a known host
+  lineinfile:
+    dest: .ssh/known_hosts
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    regexp: "^github\\.com"

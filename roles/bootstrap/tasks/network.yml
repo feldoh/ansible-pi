@@ -1,0 +1,20 @@
+---
+
+# Hostname
+- name: Set new hostname to {{ explicit_hostname }}.
+  hostname: name={{ explicit_hostname }}
+
+- name: Add hostname to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    create: yes
+    state: present
+    line: "127.0.0.1       {{ explicit_hostname}}"
+
+# Network config
+- name: Activate avahi daemon
+  shell: "insserv avahi-daemon"
+
+- name: Copy config file for avahi daemon
+  copy: src=multiple.service dest=/etc/avahi/services/multiple.service
+  notify: restart-avahi
