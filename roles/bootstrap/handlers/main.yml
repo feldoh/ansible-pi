@@ -1,0 +1,3 @@
+---
+- name: restart-avahi
+  shell: "/etc/init.d/avahi-daemon restart"

@@ -3,6 +3,17 @@
 #- name: Finish pi config
 #  command: raspi-config
 
+# Hostname
+- name: Set new hostname to {{ explicit_hostname }}.
+  hostname: name={{ explicit_hostname }}
+
+- name: Add hostname to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    create: yes
+    state: present
+    line: "127.0.0.1       {{ explicit_hostname}}"
+
 # Key management
 - name: configure keys
   authorized_key: >
@@ -10,6 +21,15 @@
     key="{{ lookup('file', 'keys/' + item) }}"
   with_items:
     - dlowe_air.pub
+    - mchapman_air.pub
+
+- name: ensure github.com is a known host
+  lineinfile:
+    dest: .ssh/known_hosts
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    regexp: "^github\\.com"
 
 - name: generate ssh key
   user: name=pi generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
@@ -41,9 +61,11 @@
 # Package management
 - name: Update apt cache.
   apt: update_cache=yes cache_valid_time=3600
+  tags: updates
 
 - name: Update the Raspbian distribution.
   apt: upgrade=yes
+  tags: updates
 
 - name: Purge required packages
   action: apt pkg={{ item }} state=absent
@@ -54,6 +76,7 @@
   apt: pkg={{ item }} state=latest
   with_items:
     - unattended-upgrades
+    - avahi-daemon
     - rpi-update
     - ack-grep
     - screen
@@ -63,10 +86,16 @@
 
 - name: Autoremove any unused packages.
   shell: "apt-get autoremove --assume-yes --purge"
+  tags: updates
 
 - name: Autoclean the system.
   shell: "apt-get autoclean --assume-yes"
+  tags: updates
 
-# Hostname
-- name: Set new hostname to {{ explicit_hostname }}.
-  hostname: name={{ explicit_hostname }}
+# Network config
+- name: Activate avahi daemon
+  shell: "insserv avahi-daemon"
+
+- name: Copy config file for avahi daemon
+  copy: src=multiple.service dest=/etc/avahi/services/multiple.service
+  notify: restart-avahi
