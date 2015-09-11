@@ -1,0 +1,12 @@
+---
+- name: Comms
+  hosts: comms
+  sudo: True
+  gather_facts: no
+  tags: comms,murmur,noip
+
+  roles:
+    - role: noip
+      tags: noip
+    - role: murmur
+      tags: murmur

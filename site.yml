@@ -1,3 +1,12 @@
 ---
 - include: bootstrap.yml
   tags: bootstrap
+
+- include: nodejs.yml
+  tags: nodejs
+
+- include: comms.yml
+  tags:
+    - comms
+    - noip
+    - murmur

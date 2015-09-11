@@ -1,0 +1,26 @@
+---
+
+# Automate some apt tasks
+- name: Cron for daily apt-get update
+  cron: name="apt-get autoupdate" weekday="*" minute="0" hour="4"
+        user="root" job="/usr/bin/apt-get update -qq"
+        cron_file=ansible_apt_autoupdate
+
+- name: Cron for daily apt-get clean
+  cron: name="apt-get autoclean" weekday="*" minute="0" hour=2
+        user="root" job="/usr/bin/apt-get clean"
+        cron_file=ansible_apt_autoclean
+
+# System housekeeping
+- cron: name="update system time" special_time=reboot
+        user="root" job="ntpdate -u ntp.ubuntu.com"
+        cron_file=ansible_ntp_update
+
+# Keep the system lean
+- name: Autoremove any unused packages.
+  shell: "apt-get autoremove --assume-yes --purge"
+  tags: updates
+
+- name: Autoclean the system.
+  shell: "apt-get autoclean --assume-yes"
+  tags: updates

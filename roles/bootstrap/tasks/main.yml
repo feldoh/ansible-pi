@@ -11,3 +11,14 @@
 
 - include: keys.yml
   tags: github,keys,ssh
+
+- include: system.yml
+  tags: groups,systemd
+
+- include: housekeeping.yml
+  tags: cron,housekeeping
+
+- name: Reboot system if required
+  command: shutdown -r now 'Rebooting to complete system upgrade'
+  args:
+    removes: /var/run/reboot-required

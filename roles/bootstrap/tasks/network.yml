@@ -11,10 +11,10 @@
     state: present
     line: "127.0.0.1       {{ explicit_hostname}}"
 
-# Network config
-- name: Activate avahi daemon
-  shell: "insserv avahi-daemon"
-
 - name: Copy config file for avahi daemon
   copy: src=multiple.service dest=/etc/avahi/services/multiple.service
   notify: restart-avahi
+
+# Network config
+- name: Activate avahi daemon
+  service: name=avahi-daemon.service enabled=yes state=started

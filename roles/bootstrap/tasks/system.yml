@@ -1,0 +1,18 @@
+---
+- name: Create nobody group
+  group: name=nobody state=present
+
+- name: Create admin group
+  group: name=admin state=present
+
+- name: Setup systemd user (nobody)
+  user: name=nobody groups=nobody,admin append=yes system=yes
+
+- name: Enable systemd
+  lineinfile:
+    dest: /boot/cmdline.txt
+    state: present
+    regexp: '^(.* rootwait)$'
+    line: '\1 init=/bin/systemd'
+    backrefs: yes
+    backup: yes

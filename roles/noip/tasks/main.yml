@@ -1,0 +1,57 @@
+---
+- name: download no-ip
+  get_url: url=http://www.no-ip.com/client/linux/{{ noip_archive }} dest=/tmp/{{ noip_archive }}
+  register: get_noip
+
+- name: Install noip systemd
+  template: src=systemd.j2 dest={{ noip_systemd }} mode=0700
+
+- name: Ensure no-ip is stopped
+  service: name=noip2.service state=stopped enabled=no
+  when: get_noip|changed
+
+- name: Clean no-ip dir
+  file: path={{ noip_dir }} state=absent
+  when: get_noip|changed
+
+- name: Clean no-ip config
+  file: path={{ noip_conf }} state=absent
+  when: get_noip|changed
+
+- name: Create no-ip config dir
+  file: path={{ noip_config_dir }} state=directory mode=0775 owner=root group=admin
+
+- name: Create no-ip dir
+  file: path={{ noip_dir }} state=directory mode=0755
+
+- name: Unzip no-ip archive
+  command: tar -xzf /tmp/{{ noip_archive }} -C {{ noip_dir }} --strip-components=1
+  when: get_noip|changed
+
+- name: make noip
+  command: make
+  args:
+    chdir: "{{ noip_dir }}"
+  when: get_noip|changed
+
+- name: Install no-ip
+  shell: |
+    spawn make install
+    expect "Please enter the login/email*"
+    send "{{ noip_email }}\r"
+    expect "Please enter the password for user*"
+    send "{{ noip_password }}\r"
+    expect "Please enter an update interval*"
+    send "30\r"
+    expect "Do you wish to run something at successful update*"
+    send "N\r"
+  args:
+    executable: /usr/bin/expect
+    chdir: "{{ noip_dir }}"
+    creates: "{{ noip_conf }}"
+
+- name: Set no-ip config permissions
+  file: path={{ noip_conf }} state=file mode=0500 owner=nobody
+
+- name: Start no-ip
+  service: name=noip2.service state=started enabled=yes

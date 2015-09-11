@@ -1,0 +1,20 @@
+---
+- name: Configure mumble-server package | daemon
+  debconf: name='mumble-server' question='mumble-server/start_daemon' value='{{ murmur_start_daemon }}' vtype='select'
+
+- name: Configure mumble-server package | high priority
+  debconf: name='mumble-server' question='mumble-server/use_capabilities' value='{{ murmur_higher_priority }}' vtype='select'
+
+- name: Configure mumble-server package | superuser
+  debconf: name='mumble-server' question='mumble-server/password' value='{{ murmur_superuser }}' vtype='password'
+
+- name: Install mumble-server
+  apt: name=mumble-server state=latest update_cache=yes
+
+- name: Generate the Murmur config file
+  template: src=mumble-server.ini.j2
+            dest=/etc/mumble-server.ini
+            owner=root
+            group=mumble-server
+            mode=640
+  notify: Restart Murmur

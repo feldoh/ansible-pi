@@ -1,0 +1,9 @@
+---
+noip_dir: /opt/noip2
+noip_config_dir: /usr/local/etc
+noip_usr_binary: /usr/local/bin/noip2
+noip_conf: /usr/local/etc/no-ip2.conf
+noip_pid: /var/run/noip2.pid
+noip_systemd: /etc/systemd/system/noip2.service
+noip_archive: noip-duc-linux.tar.gz
+noip_group: comms

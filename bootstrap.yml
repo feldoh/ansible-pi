@@ -4,6 +4,7 @@
   remote_user: pi
   sudo: True
   gather_facts: yes
+  tags: bootstrap,bootstrap_stage1
 
   roles:
     - role: bootstrap

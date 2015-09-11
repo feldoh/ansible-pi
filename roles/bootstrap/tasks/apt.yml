@@ -31,30 +31,15 @@
   apt: pkg={{ item }} state=latest
   with_items:
     - unattended-upgrades
+    - ca-certificates
     - avahi-daemon
     - ack-grep
+    - systemd
+    - ntpdate
     - screen
+    - expect
+    - make
     - cron
     - curl
     - git
     - vim
-
-# Automate some apt tasks
-- name: Cron for daily apt-get update
-  cron: name="apt-get autoupdate" weekday="*" minute="0" hour="4"
-        user="root" job="/usr/bin/apt-get update -qq"
-        cron_file=ansible_apt_autoupdate
-
-- name: Cron for daily apt-get clean
-  cron: name="apt-get autoclean" weekday="*" minute="0" hour=2
-        user="root" job="/usr/bin/apt-get clean"
-        cron_file=ansible_apt_autoclean
-
-# Keep the system lean
-- name: Autoremove any unused packages.
-  shell: "apt-get autoremove --assume-yes --purge"
-  tags: updates
-
-- name: Autoclean the system.
-  shell: "apt-get autoclean --assume-yes"
-  tags: updates
